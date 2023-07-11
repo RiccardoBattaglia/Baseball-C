@@ -67,6 +67,122 @@ public class BaseballDAO {
 			throw new RuntimeException("Error Connection Database");
 		}
 	}
+	
+	public List<Integer> getAllYearsPerTeam(String teamid) {
+		String sql = "select distinct year "
+				+ "from teams t "
+				+ "where t.name=? ";
+		List<Integer> result = new ArrayList<Integer>();
+
+		try {
+			Connection conn = DBConnect.getConnection();
+			PreparedStatement st = conn.prepareStatement(sql);
+			st.setString(1, teamid);
+			ResultSet rs = st.executeQuery();
+
+			while (rs.next()) {
+				result.add(rs.getInt("year"));
+			}
+
+			conn.close();
+			return result;
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+			System.out.println("Errore connessione al database");
+			throw new RuntimeException("Error Connection Database");
+		}
+	}
+	
+	public Integer getPesoMedio(String teamid, int anno) {
+		String sql = "select avg(p.weight) as p "
+				+ "from people p, appearances a, teams t "
+				+ "where t.name=? and t.teamcode=a.teamcode and a.playerid=p.playerid and a.year=? and a.year=t.year";
+		int result = 0;
+
+		try {
+			Connection conn = DBConnect.getConnection();
+			PreparedStatement st = conn.prepareStatement(sql);
+			st.setString(1, teamid);
+			st.setInt(2, anno);
+			ResultSet rs = st.executeQuery();
+
+			while (rs.next()) {
+				result=rs.getInt("p");
+			}
+
+			conn.close();
+			return result;
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+			System.out.println("Errore connessione al database");
+			throw new RuntimeException("Error Connection Database");
+		}
+	}
+	
+	public List<People> getPlayersTeamYear(String name, int anno){
+		String sql = "SELECT people.* "
+				+ "FROM people, appearances, teams "
+				+ "WHERE people.playerID=appearances.playerID "
+				+ "AND appearances.teamID=teams.ID "
+				+ "AND teams.year=? "
+				+ "AND teams.name=?";
+		List<People> result = new ArrayList<People>();
+
+		try {
+			Connection conn = DBConnect.getConnection();
+			PreparedStatement st = conn.prepareStatement(sql);
+			st.setInt(1, anno);
+			st.setString(2, name);
+			ResultSet rs = st.executeQuery();
+
+			while (rs.next()) {
+				result.add(new People(rs.getString("playerID"), rs.getString("birthCountry"), rs.getString("birthCity"),
+						rs.getString("deathCountry"), rs.getString("deathCity"), rs.getString("nameFirst"),
+						rs.getString("nameLast"), rs.getInt("weight"), rs.getInt("height"), rs.getString("bats"),
+						rs.getString("throws"), getBirthDate(rs), getDebutDate(rs), getFinalGameDate(rs),
+						getDeathDate(rs)));
+			}
+			conn.close();
+			return result;
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+			System.out.println("Errore connessione al database");
+			throw new RuntimeException("Error Connection Database");
+		}
+	}
+	
+	public List<People> gPdY(String name, int anno){
+		String sql = "select p.* "
+				+ "from people p, teams t, appearances a "
+				+ "where t.name=? and t.id=a.teamid and t.year=? and a.playerid=p.playerid ";
+		List<People> result = new ArrayList<People>();
+
+		try {
+			Connection conn = DBConnect.getConnection();
+			PreparedStatement st = conn.prepareStatement(sql);
+			st.setString(1, name);
+			st.setInt(2, anno);
+			ResultSet rs = st.executeQuery();
+
+			while (rs.next()) {
+				result.add(new People(rs.getString("playerID"), rs.getString("birthCountry"), rs.getString("birthCity"),
+						rs.getString("deathCountry"), rs.getString("deathCity"), rs.getString("nameFirst"),
+						rs.getString("nameLast"), rs.getInt("weight"), rs.getInt("height"), rs.getString("bats"),
+						rs.getString("throws"), getBirthDate(rs), getDebutDate(rs), getFinalGameDate(rs),
+						getDeathDate(rs)));
+			}
+			conn.close();
+			return result;
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+			System.out.println("Errore connessione al database");
+			throw new RuntimeException("Error Connection Database");
+		}
+	}
 
 	// =================================================================
 	// ==================== HELPER FUNCTIONS =========================
@@ -157,3 +273,5 @@ public class BaseballDAO {
 	}
 
 }
+
+

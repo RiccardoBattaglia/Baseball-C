@@ -5,9 +5,16 @@
 package it.polito.tdp.exam;
 
 import java.net.URL;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.ResourceBundle;
+import java.util.Set;
 
+import org.jgrapht.alg.util.Pair;
+
+import it.polito.tdp.exam.model.Dettaglio;
 import it.polito.tdp.exam.model.Model;
+import it.polito.tdp.exam.model.Vertice;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -35,10 +42,10 @@ public class FXMLController {
     private Button btnSimula; // Value injected by FXMLLoader
 
     @FXML // fx:id="cmbAnno"
-    private ComboBox<?> cmbAnno; // Value injected by FXMLLoader
+    private ComboBox<Integer> cmbAnno; // Value injected by FXMLLoader
 
     @FXML // fx:id="cmbSquadra"
-    private ComboBox<?> cmbSquadra; // Value injected by FXMLLoader
+    private ComboBox<String> cmbSquadra; // Value injected by FXMLLoader
 
     @FXML // fx:id="txtResult"
     private TextArea txtResult; // Value injected by FXMLLoader
@@ -48,12 +55,49 @@ public class FXMLController {
 
     @FXML
     void handleCreaGrafo(ActionEvent event) {
+    	
 
+   	 String squadra = cmbSquadra.getValue() ;
+    	
+    	if(squadra.equals("")) {
+    		txtResult.setText("Inserire una squadra.\n");
+    		return ;
+    	}
+    	
+//   	creazione grafo
+   	this.model.creaGrafo(squadra);
+   	
+   	
+//   	stampa grafo
+   	this.txtResult.setText("Grafo creato.\n");
+   	this.txtResult.appendText("Ci sono " + this.model.nVertici() + " vertici\n");
+   	this.txtResult.appendText("Ci sono " + this.model.nArchi() + " archi\n\n");
+   	
+   	Set<Integer> vertici = this.model.getVertici();
+   	
+   	cmbAnno.getItems().addAll(vertici);
+   	
+   	btnDettagli.setDisable(false);
+  
     }
 
     @FXML
     void handleDettagli(ActionEvent event) {
+    	
 
+      	 Integer y = cmbAnno.getValue() ;
+       	
+       	if(y==null) {
+       		txtResult.setText("Inserire un anno.\n");
+       		return ;
+       	}
+       	
+       	List<Dettaglio> dettagli = new LinkedList<>();
+       	
+       	dettagli.addAll(this.model.getDettagli(y));
+       	for(Dettaglio i : dettagli) {
+       	this.txtResult.appendText(y+"<->" + i.getAnno() + " Peso:"+i.getPeso()+"\n");
+       	}
     }
 
     @FXML
@@ -75,6 +119,10 @@ public class FXMLController {
 
     public void setModel(Model model) {
         this.model = model;
+        
+        btnDettagli.setDisable(true);
+        
+        cmbSquadra.getItems().addAll(this.model.getNomiTeams());
     }
 
 }
